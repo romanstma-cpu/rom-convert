@@ -71,6 +71,7 @@ jobs:
           name: ROM-Convert-Setup
           path: |
             release/ROM-Convert-Setup.exe
+            release/ROM-Convert-Setup.exe.blockmap
             release/latest.yml
             release/SHA256SUMS.txt
           retention-days: 14
