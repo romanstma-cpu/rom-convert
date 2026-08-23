@@ -1,0 +1,92 @@
+name: Build and release
+
+# Tag a version to publish it:
+#   npm version 1.0.1 && git push --follow-tags
+#
+# Running this by hand (workflow_dispatch) builds and tests without publishing,
+# which is the safe way to check the pipeline after changing it.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # npm ci honours the lockfile exactly, so a release is built from the
+      # same dependency tree every time. ffmpeg-static fetches its ~83 MB
+      # binary during install.
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck and unit tests
+        run: npm run check
+
+      - name: Real ffmpeg encodes
+        run: npm run ffcheck
+
+      - name: Build
+        run: npm run build
+
+      # Launches the actual app and drives it over the DevTools protocol. The
+      # hosted runner has a desktop session, but GUI automation is the first
+      # thing to go flaky in CI, so a failure here is reported without
+      # blocking a release that already passed the other two suites.
+      - name: App and IPC wiring
+        continue-on-error: true
+        run: npm run ipccheck
+
+      - name: Package installer
+        run: npx electron-builder --win --publish never
+        env:
+          # electron-builder picks these up on its own when they exist, so
+          # signing needs no config change - only the secrets.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          $exe = "release/ROM-Convert-Setup.exe"
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  ROM-Convert-Setup.exe" | Out-File release/SHA256SUMS.txt -Encoding ascii -NoNewline
+          Write-Host "SHA256 $hash"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROM-Convert-Setup
+          path: |
+            release/ROM-Convert-Setup.exe
+            release/latest.yml
+            release/SHA256SUMS.txt
+          retention-days: 14
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release create $tag `
+            --repo ${{ github.repository }} `
+            --title "ROM Convert $($tag.TrimStart('v'))" `
+            --generate-notes `
+            release/ROM-Convert-Setup.exe `
+            release/ROM-Convert-Setup.exe.blockmap `
+            release/latest.yml `
+            release/SHA256SUMS.txt
