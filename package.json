@@ -65,7 +65,7 @@
       {
         "provider": "github",
         "owner": "romanstma-cpu",
-        "repo": "rom-apps"
+        "repo": "rom-convert"
       }
     ],
     "win": {
