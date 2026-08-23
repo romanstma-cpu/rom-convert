@@ -1,0 +1,88 @@
+{
+  "name": "rom-convert",
+  "productName": "ROM Convert",
+  "version": "1.0.0",
+  "description": "Convert video, audio and images on your own PC. No upload, no watermark, no size limit.",
+  "main": "dist-electron/main.js",
+  "license": "MIT",
+  "author": {
+    "name": "ROM",
+    "url": "https://romapps.xyz"
+  },
+  "homepage": "https://romapps.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/romanstma-cpu/rom-convert.git"
+  },
+  "bugs": {
+    "url": "https://github.com/romanstma-cpu/rom-convert/issues"
+  },
+  "scripts": {
+    "build:renderer": "vite build",
+    "build:main": "esbuild electron/main.ts electron/preload.ts --bundle --platform=node --external:electron --external:electron-updater --external:ffmpeg-static --outdir=dist-electron --format=cjs",
+    "build": "npm run build:renderer && npm run build:main",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win",
+    "typecheck": "tsc --noEmit",
+    "playtest": "esbuild test/playtest.ts --bundle --platform=node --alias:electron=./test/electron-stub.js --outfile=test/playtest.js && node test/playtest.js",
+    "ffcheck": "esbuild test/ffmpeg-check.ts --bundle --platform=node --external:ffmpeg-static --outfile=test/ffmpeg-check.js --format=cjs && node test/ffmpeg-check.js",
+    "ipccheck": "esbuild test/ipc-check.ts --bundle --platform=node --outfile=test/ipc-check.js --format=cjs && node test/ipc-check.js",
+    "check": "npm run typecheck && npm run playtest",
+    "check:all": "npm run typecheck && npm run playtest && npm run ffcheck && npm run build && npm run ipccheck"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "ffmpeg-static": "^5.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^43.4.1",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3"
+  },
+  "build": {
+    "appId": "convert.rom.app",
+    "productName": "ROM Convert",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "assets/**",
+      "node_modules/ffmpeg-static/**"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "romanstma-cpu",
+        "repo": "rom-apps"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "artifactName": "ROM-Convert-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "allowScripts": {
+    "electron@43.4.1": true,
+    "esbuild@0.24.2": true,
+    "esbuild@0.25.12": true,
+    "electron-winstaller@5.4.0": true,
+    "ffmpeg-static@5.3.0": true
+  }
+}

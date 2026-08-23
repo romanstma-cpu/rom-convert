@@ -1,0 +1,745 @@
+/* ============ tokens ============ */
+/* Shared with ROM Trader so the two apps read as one family. */
+:root {
+  --void: #0b0812;
+  --panel: #141021;
+  --panel-2: #1a1429;
+  --panel-3: #221a34;
+  --border: #2b2242;
+  --border-soft: #221a35;
+  --text: #ece7f5;
+  --muted: #8d84a3;
+  --faint: #635a7a;
+  --violet: #7c3aed;
+  --violet-lo: #5b21b6;
+  --pink: #ff2d9a;
+  --green: #22c55e;
+  --red: #ff4d6d;
+  --amber: #f59e0b;
+  --mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+  --titlebar-h: 36px;
+  --radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--violet) 45%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e2545;
+  border: 3px solid var(--void);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3159;
+}
+
+/* ============ titlebar ============ */
+.titlebar {
+  height: var(--titlebar-h);
+  flex: 0 0 var(--titlebar-h);
+  display: flex;
+  align-items: stretch;
+  background: #0e0a17;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tb-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-left: 12px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.tb-drag img {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+}
+
+.tb-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+}
+
+.tb-ver {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.tb-status {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.tb-update {
+  -webkit-app-region: no-drag;
+  margin-left: 10px;
+  border: 1px solid color-mix(in srgb, var(--green) 55%, transparent);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+  color: var(--green);
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 99px;
+  cursor: pointer;
+}
+.tb-update:hover {
+  background: color-mix(in srgb, var(--green) 24%, transparent);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+.dot.on {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.dot.off {
+  background: #4a4166;
+}
+
+.tb-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+.tb-controls button {
+  width: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.tb-controls button:hover {
+  background: #221a35;
+  color: var(--text);
+}
+.tb-controls button.x:hover {
+  background: #e11d48;
+  color: #fff;
+}
+
+/* ============ layout ============ */
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ============ drop zone ============ */
+.drop {
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--panel) 0%, #100c1c 100%);
+  padding: 22px 24px;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+/* Roomier only while it is the sole thing on screen; once files are staged the
+   format picker matters more and the zone should stop hogging the fold. */
+.drop.tall {
+  padding: 40px 24px;
+}
+.drop.over {
+  border-color: var(--pink);
+  background: linear-gradient(180deg, #1b1030 0%, #150d24 100%);
+}
+.drop-icon {
+  line-height: 0;
+  margin-bottom: 10px;
+  color: var(--violet);
+}
+.drop-icon svg {
+  width: 34px;
+  height: 34px;
+}
+.drop.over .drop-icon {
+  color: var(--pink);
+}
+.drop-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.drop-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.drop-note {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ============ format grid ============ */
+/* 230px lands on four columns at the default window size. With eleven formats
+   that gives 4/4/3 rather than the 5/5/1 a narrower track produces, and a row
+   holding a single lonely card looks like a mistake. */
+.formats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 9px;
+}
+
+.fmt {
+  text-align: left;
+  border: 1px solid var(--border-soft);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.12s, background 0.12s;
+}
+.fmt:hover {
+  border-color: var(--border);
+  background: var(--panel-3);
+}
+.fmt.on {
+  border-color: var(--violet);
+  background: color-mix(in srgb, var(--violet) 18%, var(--panel-2));
+}
+.fmt-label {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.fmt-ext {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.fmt.on .fmt-ext {
+  color: color-mix(in srgb, var(--pink) 80%, var(--text));
+}
+.fmt-detail {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ============ segmented control ============ */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 15px;
+  cursor: pointer;
+}
+.seg button + button {
+  border-left: 1px solid var(--border-soft);
+}
+.seg button:hover {
+  color: var(--text);
+  background: var(--panel-3);
+}
+.seg button.on {
+  background: var(--violet);
+  color: #fff;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.opt-title {
+  font-size: 13.5px;
+  font-weight: 550;
+}
+.opt-help {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ============ queue ============ */
+.jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 11px 13px;
+}
+.job.done {
+  border-color: color-mix(in srgb, var(--green) 35%, var(--border-soft));
+}
+.job.failed {
+  border-color: color-mix(in srgb, var(--red) 45%, var(--border-soft));
+}
+.job.running {
+  border-color: color-mix(in srgb, var(--violet) 55%, var(--border-soft));
+}
+
+.job-icon {
+  font-size: 17px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.job-name {
+  font-size: 13.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.job-meta .err {
+  color: var(--red);
+}
+.job-meta .ok {
+  color: var(--green);
+}
+
+.job-actions {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.bar {
+  height: 4px;
+  background: #241c39;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--pink));
+  border-radius: 99px;
+  transition: width 0.25s ease-out;
+}
+/* An encode with no known duration still has to look alive. */
+.bar.indeterminate > span {
+  width: 35% !important;
+  animation: slide 1.1s ease-in-out infinite;
+}
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(330%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar.indeterminate > span {
+    animation: none;
+    width: 100% !important;
+    opacity: 0.45;
+  }
+}
+
+/* ============ buttons ============ */
+.btn {
+  border: 1px solid var(--border);
+  background: var(--panel-3);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  padding: 8px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: filter 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.18);
+}
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: linear-gradient(135deg, var(--violet), var(--pink));
+  border-color: transparent;
+  color: #fff;
+}
+.btn.danger {
+  background: #3a1020;
+  border-color: #6b1d33;
+  color: #ff8fa6;
+}
+.btn.quiet {
+  background: transparent;
+}
+.btn.tiny {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 7px;
+}
+
+.linkish {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.linkish:hover {
+  color: var(--text);
+}
+
+/* ============ action bar ============ */
+.actionbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 24px;
+  background: #0e0a17;
+  border-top: 1px solid var(--border-soft);
+}
+.actionbar .spacer {
+  flex: 1;
+}
+.actionbar .summary {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* ============ notices ============ */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+}
+.notice.bad {
+  border-color: color-mix(in srgb, var(--red) 50%, transparent);
+  background: color-mix(in srgb, var(--red) 12%, var(--panel-2));
+}
+.notice.warn {
+  border-color: color-mix(in srgb, var(--amber) 45%, transparent);
+  background: color-mix(in srgb, var(--amber) 10%, var(--panel-2));
+}
+.notice.good {
+  border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  background: color-mix(in srgb, var(--green) 10%, var(--panel-2));
+}
+
+/* ============ fields ============ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.field-label {
+  font-size: 12.5px;
+  font-weight: 550;
+}
+.field-help {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  background: #0f0b1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 11px;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--violet);
+}
+.path {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+/* ============ toggle ============ */
+.toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  cursor: pointer;
+  padding: 7px 0;
+}
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-track {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 20px;
+  border-radius: 99px;
+  background: #322747;
+  position: relative;
+  transition: background 0.15s;
+  margin-top: 1px;
+}
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #b9aed4;
+  transition: transform 0.15s, background 0.15s;
+}
+.toggle input:checked + .toggle-track {
+  background: var(--violet);
+}
+.toggle input:checked + .toggle-track .toggle-knob {
+  transform: translateX(16px);
+  background: #fff;
+}
+.toggle input:focus-visible + .toggle-track {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.toggle-label {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+/* ============ modal ============ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 4, 11, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 24px;
+}
+.modal {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+.modal h2 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.modal .body {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.modal .row-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ============ toasts ============ */
+.toasts {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 60;
+  max-width: 380px;
+}
+.toast {
+  background: var(--panel-3);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.toast.ok {
+  border-left-color: var(--green);
+}
+.toast.bad {
+  border-left-color: var(--red);
+}
+.toast.info {
+  border-left-color: var(--violet);
+}
+
+/* ============ misc ============ */
+.empty {
+  color: var(--faint);
+  text-align: center;
+  padding: 30px;
+  font-size: 13px;
+}
+.tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 2px 9px;
+}
+.tag.good {
+  color: var(--green);
+  border-color: color-mix(in srgb, var(--green) 50%, transparent);
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}

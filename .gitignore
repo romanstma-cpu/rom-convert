@@ -1,0 +1,17 @@
+node_modules/
+
+# build output
+dist/
+dist-electron/
+release/
+
+# bundled from the .ts sources beside them
+test/playtest.js
+test/ffmpeg-check.js
+test/ipc-check.js
+
+# local editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
