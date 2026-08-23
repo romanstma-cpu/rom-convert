@@ -104,5 +104,5 @@ src/                   React renderer
 
 ## Licence
 
-MIT. ffmpeg is bundled under its own licence (LGPL/GPL depending on build) and
-is not covered by this project's MIT grant.
+MIT — see [LICENSE](LICENSE). The bundled FFmpeg carries its own terms; see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
