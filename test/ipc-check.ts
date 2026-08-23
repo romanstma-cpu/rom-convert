@@ -313,6 +313,58 @@ async function main(): Promise<void> {
     await sleep(500);
     check("the dialog closes again", await cdp.eval<boolean>(`!document.querySelector(".modal")`));
 
+    // --- dragging files in, the way almost everyone will actually use this
+    //
+    // Electron removed the non-standard File.path, so a drop handler can no
+    // longer read where a file came from; the preload has to resolve it with
+    // webUtils. That is easy to get wrong and impossible to notice in a unit
+    // test, and it is the app's headline interaction, so it gets a real drop.
+    {
+      const dropped = await makeSample();
+
+      const target = await cdp.eval<{ x: number; y: number }>(`(() => {
+        const r = document.querySelector(".drop").getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      })()`);
+
+      const dragData = {
+        items: [{ mimeType: "text/uri-list", data: `file:///${dropped.replace(/\\/g, "/")}` }],
+        files: [dropped],
+        dragOperationsMask: 1,
+      };
+      for (const type of ["dragEnter", "dragOver", "drop"] as const) {
+        await cdp.send("Input.dispatchDragEvent", { type, x: target.x, y: target.y, data: dragData });
+        await sleep(200);
+      }
+      await sleep(1200);
+
+      const staged = await cdp.eval<string[]>(
+        `[...document.querySelectorAll(".job-name")].map(n => n.textContent.trim())`,
+      );
+      check(
+        "a dropped file appears in the staged list",
+        staged.some((n) => n.includes("sample.mp4")),
+        staged.join(" | ") || "nothing staged",
+      );
+      check(
+        "the drop resolved a real path, not an empty one",
+        await cdp.eval<boolean>(
+          `[...document.querySelectorAll(".job-name")].some(n => n.getAttribute("title") && n.getAttribute("title").includes("sample.mp4"))`,
+        ),
+      );
+
+      // Clear it again so the conversion case below starts from a clean tray.
+      const cleared = await cdp.click(`.linkish`);
+      if (cleared) await sleep(400);
+      await cdp.eval(`(() => {
+        const btns = [...document.querySelectorAll("button")];
+        const clear = btns.find(b => b.textContent.trim() === "Remove all");
+        if (clear) clear.click();
+      })()`);
+      await sleep(400);
+      fs.rmSync(path.dirname(dropped), { recursive: true, force: true });
+    }
+
     // --- a real conversion, driven through main's own handlers
     //
     // ffmpeg-check drives ConvertQueue directly, so it never exercises the
