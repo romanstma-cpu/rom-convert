@@ -1,0 +1,37 @@
+PackageIdentifier: ROM.Convert
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: ROM
+PublisherUrl: https://romapps.xyz
+PublisherSupportUrl: https://github.com/romanstma-cpu/rom-convert/issues
+PackageName: ROM Convert
+PackageUrl: https://romapps.xyz
+License: MIT
+LicenseUrl: https://github.com/romanstma-cpu/rom-convert/blob/main/LICENSE
+ShortDescription: Convert video, audio and images on your own PC. No upload, no watermark, no size limit.
+Description: |-
+  ROM Convert turns video, audio and images into other formats using a copy of
+  ffmpeg bundled inside the app. Nothing is uploaded, there is no file size cap
+  and no watermark, and it works with the network switched off.
+
+  Eleven outputs across video, audio and images, described by what they are for
+  rather than by codec name. Drag in as many files as you like and the queue
+  works through them with real progress, an optional resolution cap and
+  trimming.
+
+  It never overwrites: converting the same file twice keeps both results, and
+  writing over the original is refused. Cancelling or failing deletes the
+  partly-written file rather than leaving a truncated one behind.
+
+  ffmpeg is bundled under its own licence, which is why the download is large.
+Moniker: rom-convert
+Tags:
+  - video
+  - audio
+  - converter
+  - ffmpeg
+  - media
+  - offline
+ReleaseNotesUrl: https://github.com/romanstma-cpu/rom-convert/releases/tag/v1.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

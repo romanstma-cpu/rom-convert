@@ -53,6 +53,16 @@ npm run dist
 installer is large. It is unpacked out of the asar at build time, because a
 binary inside an asar archive can be read but not executed.
 
+`winget/` holds validated manifests for the Windows Package Manager. To publish
+a version, refresh `PackageVersion`, `InstallerUrl` and `InstallerSha256`, then
+copy the three files into `manifests/r/ROM/Convert/<version>/` in a fork of
+[microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) and open a
+pull request. Check them first with `winget validate --manifest winget`.
+
+Releases go to this repo, never to `rom-apps`. electron-updater resolves its
+feed from the newest release in a repo, so two auto-updating apps sharing one
+release channel take turns breaking each other's update checks.
+
 ## Testing
 
 ```
