@@ -19,7 +19,7 @@ function logPath(): string {
     fs.mkdirSync(dir, { recursive: true });
     return path.join(dir, "crash.log");
   } catch {
-    return path.join(os.tmpdir(), "rom-trader-crash.log");
+    return path.join(os.tmpdir(), "rom-convert-crash.log");
   }
 }
 
@@ -33,7 +33,7 @@ export function reportFatal(err: unknown, origin: string): void {
   const entry =
     // ASCII only: this file gets opened in whatever editor the reader has.
     `\n=== ${new Date().toISOString()} - ${origin} ===\n` +
-    `ROM Trader ${app.getVersion()} | Electron ${process.versions.electron} | ` +
+    `ROM Convert ${app.getVersion()} | Electron ${process.versions.electron} | ` +
     `${os.platform()} ${os.release()} (${process.arch})\n` +
     `${describe(err)}\n`;
 
@@ -48,7 +48,7 @@ export function reportFatal(err: unknown, origin: string): void {
   reported = true;
 
   dialog.showErrorBox(
-    "ROM Trader failed to start",
+    "ROM Convert failed to start",
     `${describe(err)}\n\n` +
       `Details were written to:\n${file}\n\n` +
       `Send that file to whoever set this up and they can fix it.`,
